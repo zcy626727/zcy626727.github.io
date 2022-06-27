@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><meta><title>Kubernetes 配置及命令 - 路由器</title><link rel="manifest" href="/manifest.json"><meta name="application-name" content="路由器"><meta name="msapplication-TileImage" content="/img/favicon.svg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="路由器"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="description" content="使用 kubernetes 时主要通过命令和配置文件的方式描述核心组件操作 API 对象的目标状态，本篇介绍核心技术中各个组件的不同配置方式"><meta property="og:type" content="blog"><meta property="og:title" content="Kubernetes 配置及命令"><meta property="og:url" content="http://example.com/2022/05/23/tools/Kubernetes/Kubernetes%E9%85%8D%E7%BD%AE%E5%8F%8A%E5%91%BD%E4%BB%A4/"><meta property="og:site_name" content="路由器"><meta property="og:description" content="使用 kubernetes 时主要通过命令和配置文件的方式描述核心组件操作 API 对象的目标状态，本篇介绍核心技术中各个组件的不同配置方式"><meta property="og:locale" content="zh_CN"><meta property="og:image" content="http://example.com/img/og_image.png"><meta property="article:published_time" content="2022-05-23T05:18:16.000Z"><meta property="article:modified_time" content="2022-06-27T07:34:31.296Z"><meta property="article:author" content="路由器"><meta property="article:tag" content="Kubernetes"><meta property="twitter:card" content="summary"><meta property="twitter:image" content="/img/og_image.png"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://example.com/2022/05/23/tools/Kubernetes/Kubernetes%E9%85%8D%E7%BD%AE%E5%8F%8A%E5%91%BD%E4%BB%A4/"},"headline":"Kubernetes 配置及命令","image":["http://example.com/img/og_image.png"],"datePublished":"2022-05-23T05:18:16.000Z","dateModified":"2022-06-27T07:34:31.296Z","author":{"@type":"Person","name":"路由器"},"publisher":{"@type":"Organization","name":"路由器","logo":{"@type":"ImageObject","url":"http://example.com/img/logo.svg"}},"description":"使用 kubernetes 时主要通过命令和配置文件的方式描述核心组件操作 API 对象的目标状态，本篇介绍核心技术中各个组件的不同配置方式"}</script><link rel="canonical" href="http://example.com/2022/05/23/tools/Kubernetes/Kubernetes%E9%85%8D%E7%BD%AE%E5%8F%8A%E5%91%BD%E4%BB%A4/"><link rel="icon" href="/img/favicon.svg"><link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.2/css/all.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@9.12.0/styles/atom-one-light.css"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;600&amp;family=Source+Code+Pro"><link rel="stylesheet" href="/css/default.css"><style>body>.footer,body>.navbar,body>.section{opacity:0}</style><!--!--><!--!--><!--!--><!--!--><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/css/lightgallery.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/css/justifiedGallery.min.css"><!--!--><!--!--><style>.pace{-webkit-pointer-events:none;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}.pace-inactive{display:none}.pace .pace-progress{background:#3273dc;position:fixed;z-index:2000;top:0;right:100%;width:100%;height:2px}</style><script src="https://cdn.jsdelivr.net/npm/pace-js@1.2.4/pace.min.js"></script><!--!--><!--!--><!-- hexo injector head_end start --><script>
+  (function () {
+      function switchTab() {
+          if (!location.hash) {
+            return;
+          }
+          Array
+              .from(document.querySelectorAll('.tab-content'))
+              .forEach($tab => {
+                  $tab.classList.add('is-hidden');
+              });
+          Array
+              .from(document.querySelectorAll('.tabs li'))
+              .forEach($tab => {
+                  $tab.classList.remove('is-active');
+              });
+          const $activeTab = document.querySelector(location.hash);
+          if ($activeTab) {
+              $activeTab.classList.remove('is-hidden');
+          }
+          const $tabMenu = document.querySelector(`a[href="${location.hash}"]`);
+          if ($tabMenu) {
+              $tabMenu.parentElement.classList.add('is-active');
+          }
+      }
+      switchTab();
+      window.addEventListener('hashchange', switchTab, false);
+  })();
+  </script><!-- hexo injector head_end end --><meta name="generator" content="Hexo 6.2.0"></head><body class="is-3-column"><nav class="navbar navbar-main"><div class="container navbar-container"><div class="navbar-brand justify-content-center"><a class="navbar-item navbar-logo" href="/"><img src="/img/logo.svg" alt="路由器" height="28"></a></div><div class="navbar-menu"><div class="navbar-start"><a class="navbar-item" href="/">Home</a><a class="navbar-item" href="/archives">Archives</a><a class="navbar-item" href="/categories">Categories</a><a class="navbar-item" href="/tags">Tags</a><a class="navbar-item" href="/about">About</a></div><div class="navbar-end"><a class="navbar-item" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a><a class="navbar-item search" title="搜索" href="javascript:;"><i class="fas fa-search"></i></a></div></div></div></nav><section class="section"><div class="container"><div class="columns"><div class="column order-2 column-main is-8-tablet is-8-desktop is-6-widescreen"><div class="card"><article class="card-content article" role="article"><div class="article-meta is-size-7 is-uppercase level is-mobile"><div class="level-left"><span class="level-item"><time dateTime="2022-05-23T05:18:16.000Z" title="2022/5/23 13:18:16">2022-05-23</time>发表</span><span class="level-item"><time dateTime="2022-06-27T07:34:31.296Z" title="2022/6/27 15:34:31">2022-06-27</time>更新</span><span class="level-item"><a class="link-muted" href="/categories/Kubernetes/">Kubernetes</a></span><span class="level-item">12 分钟读完 (大约1846个字)</span></div></div><h1 class="title is-3 is-size-4-mobile">Kubernetes 配置及命令</h1><div class="content"><p>使用 <code>kubernetes</code> 时主要通过命令和配置文件的方式描述核心组件操作 <code>API</code> 对象的目标状态，本篇介绍核心技术中各个组件的不同配置方式</p>
+<span id="more"></span>
+
+
+
+<p><code>kubectl</code>工具支持三种对象管理方式：</p>
+<ul>
+<li>命令式对象管理：使用一条条指令操作对象</li>
+<li>命令式对象配置：通过命令配置和配置文件操作对象</li>
+<li>声明式对象配置：通过<code>apply</code>命令和配置文件操作对象</li>
+</ul>
+<h2 id="命令式对象管理"><a href="#命令式对象管理" class="headerlink" title="命令式对象管理"></a>命令式对象管理</h2><p>使用<code>kubectl</code>命令行工具提供的指令对对象进行管理，语法格式如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl [command] [type] [name] [flags]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>command</code>：执行的操作</li>
+<li><code>type</code>：对象的类型</li>
+<li><code>name</code>：指定对象的名称，大小写敏感</li>
+<li><code>flags</code>：额外的参数</li>
+</ul>
+<p><strong>说明</strong>：</p>
+<ul>
+<li>为节省位置，后文列出的命令都省略了<code>kubectl</code>。</li>
+</ul>
+<h3 id="常用对象"><a href="#常用对象" class="headerlink" title="常用对象"></a>常用对象</h3><table>
+<thead>
+<tr>
+<th>对象分类</th>
+<th>对象名称</th>
+<th>缩写</th>
+<th>对象作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>集群级别对象</td>
+<td>nodes</td>
+<td>no</td>
+<td>集群组成部分</td>
+</tr>
+<tr>
+<td></td>
+<td>namespaces</td>
+<td>ns</td>
+<td>隔离Pod</td>
+</tr>
+<tr>
+<td>pod对象</td>
+<td>pods</td>
+<td>po</td>
+<td>装载容器</td>
+</tr>
+<tr>
+<td>pod对象控制器</td>
+<td>replicationcontrollers</td>
+<td>rc</td>
+<td>控制pod对象</td>
+</tr>
+<tr>
+<td></td>
+<td>replicasets</td>
+<td>rs</td>
+<td>控制pod对象</td>
+</tr>
+<tr>
+<td></td>
+<td>deployments</td>
+<td>deploy</td>
+<td>控制pod对象</td>
+</tr>
+<tr>
+<td></td>
+<td>daemonsets</td>
+<td>ds</td>
+<td>控制pod对象</td>
+</tr>
+<tr>
+<td></td>
+<td>jobs</td>
+<td></td>
+<td>控制pod对象</td>
+</tr>
+<tr>
+<td></td>
+<td>cronjobs</td>
+<td>cj</td>
+<td>控制pod对象</td>
+</tr>
+<tr>
+<td></td>
+<td>horizontalpodautoscalers</td>
+<td>hpa</td>
+<td>控制pod对象</td>
+</tr>
+<tr>
+<td></td>
+<td>statefulsets</td>
+<td>sts</td>
+<td>控制pod对象</td>
+</tr>
+<tr>
+<td>服务发现对象</td>
+<td>services</td>
+<td>svc</td>
+<td>统一pod对外接口</td>
+</tr>
+<tr>
+<td></td>
+<td>ingress</td>
+<td>ing</td>
+<td>统一pod对外接口</td>
+</tr>
+<tr>
+<td>存储对象</td>
+<td>volumeattachments</td>
+<td></td>
+<td>存储</td>
+</tr>
+<tr>
+<td></td>
+<td>persistentvolumes</td>
+<td>pv</td>
+<td>存储</td>
+</tr>
+<tr>
+<td></td>
+<td>persistentvolumeclaims</td>
+<td>pvc</td>
+<td>存储</td>
+</tr>
+<tr>
+<td>配置对象</td>
+<td>configmaps</td>
+<td>cm</td>
+<td>配置</td>
+</tr>
+<tr>
+<td></td>
+<td>secrets</td>
+<td></td>
+<td>配置</td>
+</tr>
+</tbody></table>
+<h3 id="常用指令"><a href="#常用指令" class="headerlink" title="常用指令"></a>常用指令</h3><table>
+<thead>
+<tr>
+<th>命令分类</th>
+<th>命令</th>
+<th>命令作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>基本命令</td>
+<td>create</td>
+<td>创建对象</td>
+</tr>
+<tr>
+<td></td>
+<td>edit</td>
+<td>编辑对象</td>
+</tr>
+<tr>
+<td></td>
+<td>get</td>
+<td>获取对象</td>
+</tr>
+<tr>
+<td></td>
+<td>patch</td>
+<td>更新对象</td>
+</tr>
+<tr>
+<td></td>
+<td>delete</td>
+<td>删除对象</td>
+</tr>
+<tr>
+<td></td>
+<td>explain</td>
+<td>展示对象文档</td>
+</tr>
+<tr>
+<td>运行和调试</td>
+<td>run</td>
+<td>在集群中运行一个指定的镜像</td>
+</tr>
+<tr>
+<td></td>
+<td>expose</td>
+<td>暴露对象为Service</td>
+</tr>
+<tr>
+<td></td>
+<td>describe</td>
+<td>显示对象内部信息</td>
+</tr>
+<tr>
+<td></td>
+<td>logs</td>
+<td>输出容器在 pod 中的日志</td>
+</tr>
+<tr>
+<td></td>
+<td>attach</td>
+<td>进入运行中的容器</td>
+</tr>
+<tr>
+<td></td>
+<td>exec</td>
+<td>执行容器中的一个命令</td>
+</tr>
+<tr>
+<td></td>
+<td>cp</td>
+<td>在Pod内外复制文件</td>
+</tr>
+<tr>
+<td></td>
+<td>rollout</td>
+<td>管理对象的发布</td>
+</tr>
+<tr>
+<td></td>
+<td>scale</td>
+<td>扩(缩)容Pod的数量</td>
+</tr>
+<tr>
+<td></td>
+<td>autoscale</td>
+<td>自动调整Pod的数量</td>
+</tr>
+<tr>
+<td>高级命令</td>
+<td>apply</td>
+<td>通过文件对对象进行配置</td>
+</tr>
+<tr>
+<td></td>
+<td>label</td>
+<td>更新对象上的标签</td>
+</tr>
+<tr>
+<td>其他命令</td>
+<td>cluster-info</td>
+<td>显示集群信息</td>
+</tr>
+<tr>
+<td></td>
+<td>version</td>
+<td>显示当前Server和Client的版本</td>
+</tr>
+<tr>
+<td></td>
+<td>api-versions</td>
+<td>查看apiVersion</td>
+</tr>
+</tbody></table>
+<h2 id="命令式对象配置"><a href="#命令式对象配置" class="headerlink" title="命令式对象配置"></a>命令式对象配置</h2><p>命令式对象配置是使用配置文件和命令想结合的方式管理对象。操作步骤如下：</p>
+<ol>
+<li>首先编写配置文件，配置文件内包含对对象的声明和约束</li>
+<li>使用命令执行配置文件进而操作对象</li>
+</ol>
+<h3 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>命令作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>create -f &lt;filename|url&gt;</td>
+<td>创建对象</td>
+</tr>
+<tr>
+<td>replace -f &lt;filename|url&gt;</td>
+<td>更新对象</td>
+</tr>
+<tr>
+<td>delete -f &lt;filename|url&gt;</td>
+<td>删除对象</td>
+</tr>
+<tr>
+<td>get -f &lt;filename|url&gt;  -o yaml</td>
+<td>查看对象</td>
+</tr>
+</tbody></table>
+<h2 id="声明式对象配置"><a href="#声明式对象配置" class="headerlink" title="声明式对象配置"></a>声明式对象配置</h2><p>声明式对象配置是将所有对于对象的描述都声明在配置文件中，只需要执行<code>apply</code>命令执行配置文件目录，<code>Kubernetes</code>会创建指定目录中配置文件所定义的所有对象除非对应对象已经存在：</p>
+<h3 id="常用命令-1"><a href="#常用命令-1" class="headerlink" title="常用命令"></a>常用命令</h3><table>
+<thead>
+<tr>
+<th>命令</th>
+<th>命令作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>apply -f &lt;目录&#x2F;&gt;</td>
+<td>创建&#x2F;更新对象，添加-R可以递归地处理目录</td>
+</tr>
+<tr>
+<td>diff -f &lt;配置文件|目录&#x2F;&gt;</td>
+<td>打印出将被创建的对象</td>
+</tr>
+<tr>
+<td>get -f &lt;配置文件&gt;</td>
+<td>打印现时配置</td>
+</tr>
+<tr>
+<td>delete  -f &lt;文件名&gt;</td>
+<td>删除对象</td>
+</tr>
+</tbody></table>
+<p>在使用<code>apply</code>命令后也可以手动使用命令来更新集群的配置，比如使用<code>scale</code>进行扩容时，当前最新的配置就叫<strong>现时配置</strong>。</p>
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p><code>Kubernetes</code>配置文件可以为<code>YAML</code>或<code>JSON</code>，官方推荐使用<code>YAML</code>。配置文件中有如下基本项</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span>	<span class="comment">#使用的api版本，一般为v1，代表的稳定版本</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span>		<span class="comment">#对象的类型</span></span><br><span class="line"><span class="attr">metadata:</span>		<span class="comment">#对象的元数据，如namespace、name、label等</span></span><br><span class="line"><span class="attr">spec:</span>			<span class="comment">#指定对象的目标状态，对于不同类型的对象也有不同的值</span></span><br><span class="line"><span class="attr">status:</span>			<span class="comment">#对象的当前状态，不需要</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Workload-API"><a href="#Workload-API" class="headerlink" title="Workload API"></a>Workload API</h4><h5 id="Pod-配置"><a href="#Pod-配置" class="headerlink" title="Pod 配置"></a>Pod 配置</h5><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Pod</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">Pod—example</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment">#Pod包含的容器列表，一个Pod中至少要有一个容器</span></span><br><span class="line">  <span class="attr">containers:</span> </span><br><span class="line">    <span class="comment">#容器名称</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">con-name</span></span><br><span class="line">    <span class="comment">#指定镜像</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">image</span></span><br><span class="line">    <span class="comment">#容器运行时执行的命令</span></span><br><span class="line">    <span class="attr">command:</span> [<span class="string">&quot;echo&quot;</span>]</span><br><span class="line">    <span class="comment">#命令的参数</span></span><br><span class="line">    <span class="attr">args:</span> [<span class="string">&quot;Hello,world&quot;</span>]</span><br><span class="line">    <span class="comment">#从容器公开的端口列表</span></span><br><span class="line">    <span class="attr">ports:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">containerPort:</span> <span class="number">80</span></span><br><span class="line">    <span class="comment">#容器内部环境变量</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">env:</span></span><br><span class="line">        <span class="comment">#环境变量名</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">GRPC_PORT</span></span><br><span class="line">        <span class="comment">#环境变量值</span></span><br><span class="line">        <span class="attr">value:</span> <span class="string">&quot;8080&quot;</span></span><br><span class="line">  <span class="comment">#node从最后一次处于活动状态到标记为失败并终止持续的时间，单位：秒</span></span><br><span class="line">  <span class="attr">activeDeadlineSeconds:</span> <span class="number">3</span>	</span><br><span class="line">  <span class="comment">#Pod的主机名，不指定默认为主机系统设置的值</span></span><br><span class="line">  <span class="attr">hostname:</span> <span class="string">host-name</span></span><br><span class="line">  <span class="comment">#将Pod调度到指定的Node上，如果该Node资源符合要求的话</span></span><br><span class="line">  <span class="attr">nodeName:</span> <span class="string">node—name</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="Deployment-配置"><a href="#Deployment-配置" class="headerlink" title="Deployment 配置"></a>Deployment 配置</h5><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">deployment-example</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment">#副本数</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="comment">#Pod的标签选择器，符合匹配条件的副本集的Pod才会受本次Deployment的影响</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">nginx</span></span><br><span class="line">  <span class="comment">#模板规范，描述将要创建的Pod</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">test</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">test</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">test-image</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="Job-配置"><a href="#Job-配置" class="headerlink" title="Job 配置"></a>Job 配置</h5><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">batch/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Job</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">job-example</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment">#指定所需要完成任务的Pod数量</span></span><br><span class="line">  <span class="attr">completions:</span> <span class="number">3</span></span><br><span class="line">  <span class="comment">#任务执行时创建的Pod</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">example-job</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">job-con-name</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">job-image</span></span><br><span class="line">        <span class="attr">command:</span> [<span class="string">&quot;perl&quot;</span>]</span><br><span class="line">        <span class="attr">args:</span> [<span class="string">&quot;-Mbignum=bpi&quot;</span>, <span class="string">&quot;-wle&quot;</span>, <span class="string">&quot;print bpi(2000)&quot;</span>]</span><br><span class="line">      <span class="comment">#指定容器结束后不会重启</span></span><br><span class="line">      <span class="attr">restartPolicy:</span> <span class="string">Never</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="ReplicationController-配置"><a href="#ReplicationController-配置" class="headerlink" title="ReplicationController 配置"></a>ReplicationController 配置</h5><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ReplicationController</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">RC-example</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment">#副本数</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="comment">#新建pod完成后要持续指定的时间该Pod才被视为可用，默认为0，单位：秒</span></span><br><span class="line">  <span class="attr">minReadySeconds:</span> <span class="number">1</span></span><br><span class="line">  <span class="comment">#标签选择器，符合匹配条件的Pod才会被副本集管理</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">nginx</span></span><br><span class="line">  <span class="comment">#检测到副本不足时会创建的pod模板</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">nginx</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="comment"># Run the nginx image</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nginx</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">nginx:1.14</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="ReplicaSet-配置"><a href="#ReplicaSet-配置" class="headerlink" title="ReplicaSet 配置"></a>ReplicaSet 配置</h5><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ReplicaSet</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">RS-example</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment">#副本数量</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="comment">#新建pod完成后要持续指定的时间该Pod才被视为可用，默认为0，单位：秒</span></span><br><span class="line">  <span class="attr">minReadySeconds:</span> <span class="number">1</span></span><br><span class="line">  <span class="comment">#标签选择器，符合匹配条件的Pod才会被副本集管理，在RC基础上增加了equality-based匹配机制</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">nginx</span></span><br><span class="line">  <span class="comment">#检测到副本不足时会创建的pod模板</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">nginx</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">nginx</span></span><br><span class="line">        <span class="attr">image:</span> <span class="string">nginx:1.14</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="Service-API"><a href="#Service-API" class="headerlink" title="Service API"></a>Service API</h4><h5 id="Service-配置"><a href="#Service-配置" class="headerlink" title="Service 配置"></a>Service 配置</h5><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">service-example</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="comment">#向外公开的端口数组</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">      <span class="comment">#端口的名称</span></span><br><span class="line">    <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">http</span></span><br><span class="line">      <span class="comment">#容器要公开的端口</span></span><br><span class="line">      <span class="attr">port:</span> <span class="number">80</span></span><br><span class="line">      <span class="comment">#在Pod上要访问的端口号或名称</span></span><br><span class="line">      <span class="attr">targetPort:</span> <span class="number">80</span></span><br><span class="line">      <span class="comment">#此端口的IP协议，支持TCP、UDP、SCTP，默认TCP</span></span><br><span class="line">      <span class="attr">protocol:</span> <span class="string">UDP</span></span><br><span class="line">  <span class="comment">#标签选择器，将服务流量转发到符合匹配条件的Pod，不适用于ExternalName方式</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">nginx</span></span><br><span class="line">  <span class="comment">#服务向外暴露的方式，支持ClusterIP（默认）、ExternalName、NodePort 、LoadBalancer</span></span><br><span class="line">  <span class="comment">#ClusterIP：为Endpoint分配一个集群内部IP地址</span></span><br><span class="line">  <span class="comment">#NodePort：在每个Node上分配一个端口，该端口路由到与clusterIP相同的Endpoint</span></span><br><span class="line">  <span class="comment">#LoadBalancer：基于NodePort构建并创建一个外部负载均衡器，它路由到与clusterIP相同的端点</span></span><br><span class="line">  <span class="comment">#ExternalName：将此服务的别名为指定为externalName，其他几个字段不适用于ExternalName服务</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">LoadBalancer</span></span><br><span class="line">  <span class="comment">#外部服务别名</span></span><br><span class="line">  <span class="attr">externalName:</span> <span class="string">external-service-name</span></span><br><span class="line">  <span class="comment">#外部IP地址列表</span></span><br><span class="line">  <span class="attr">externalIPs:</span> </span><br><span class="line">    <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.2</span><span class="number">.5</span></span><br><span class="line">    <span class="bullet">-</span> <span class="number">192.168</span><span class="number">.2</span><span class="number">.6</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+</div><div class="article-licensing box"><div class="licensing-title"><p>Kubernetes 配置及命令</p><p><a href="http://example.com/2022/05/23/tools/Kubernetes/Kubernetes配置及命令/">http://example.com/2022/05/23/tools/Kubernetes/Kubernetes配置及命令/</a></p></div><div class="licensing-meta level is-mobile"><div class="level-left"><div class="level-item is-narrow"><div><h6>作者</h6><p>路由器</p></div></div><div class="level-item is-narrow"><div><h6>发布于</h6><p>2022-05-23</p></div></div><div class="level-item is-narrow"><div><h6>更新于</h6><p>2022-06-27</p></div></div><div class="level-item is-narrow"><div><h6>许可协议</h6><p><a class="icons" rel="noopener" target="_blank" title="Creative Commons" href="https://creativecommons.org/"><i class="icon fab fa-creative-commons"></i></a><a class="icons" rel="noopener" target="_blank" title="Attribution" href="https://creativecommons.org/licenses/by/4.0/"><i class="icon fab fa-creative-commons-by"></i></a><a class="icons" rel="noopener" target="_blank" title="Noncommercial" href="https://creativecommons.org/licenses/by-nc/4.0/"><i class="icon fab fa-creative-commons-nc"></i></a></p></div></div></div></div></div><div class="article-tags is-size-7 mb-4"><span class="mr-2">#</span><a class="link-muted mr-2" rel="tag" href="/tags/Kubernetes/">Kubernetes</a></div><div class="notification is-danger">You need to set <code>install_url</code> to use ShareThis. Please set it in <code>_config.yml</code>.</div></article></div><div class="card"><div class="card-content"><h3 class="menu-label has-text-centered">喜欢这篇文章？打赏一下作者吧</h3><div class="buttons is-centered"><a class="button donate" href="/" target="_blank" rel="noopener" data-type="afdian"><span class="icon is-small"><i class="fas fa-charging-station"></i></span><span>爱发电</span></a><a class="button donate" data-type="alipay"><span class="icon is-small"><i class="fab fa-alipay"></i></span><span>支付宝</span><span class="qrcode"><img src="/" alt="支付宝"></span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="buymeacoffee"><span class="icon is-small"><i class="fas fa-coffee"></i></span><span>送我杯咖啡</span></a><a class="button donate" href="/" target="_blank" rel="noopener" data-type="patreon"><span class="icon is-small"><i class="fab fa-patreon"></i></span><span>Patreon</span></a><div class="notification is-danger">You forgot to set the <code>business</code> or <code>currency_code</code> for Paypal. Please set it in <code>_config.yml</code>.</div><a class="button donate" data-type="wechat"><span class="icon is-small"><i class="fab fa-weixin"></i></span><span>微信</span><span class="qrcode"><img src="/" alt="微信"></span></a></div></div></div><nav class="post-navigation mt-4 level is-mobile"><div class="level-start"><a class="article-nav-prev level level-item link-muted" href="/2022/05/29/linux/ubuntu/Ubuntu%20%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/"><i class="level-item fas fa-chevron-left"></i><span class="level-item">Ubuntu 包管理器</span></a></div><div class="level-end"><a class="article-nav-next level level-item link-muted" href="/2022/05/15/tools/Kubernetes/Kubernetes%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF/"><span class="level-item">Kubernetes 核心技术</span><i class="level-item fas fa-chevron-right"></i></a></div></nav><div class="card"><div class="card-content"><h3 class="title is-5">评论</h3><div class="notification is-danger">You forgot to set the <code>shortname</code> for Disqus. Please set it in <code>_config.yml</code>.</div></div></div></div><div class="column column-left is-4-tablet is-4-desktop is-3-widescreen  order-1"><div class="card widget" data-type="profile"><div class="card-content"><nav class="level"><div class="level-item has-text-centered flex-shrink-1"><div><figure class="image is-128x128 mx-auto mb-2"><img class="avatar" src="https://www.gravatar.com/avatar/1b4f26fe0c8442e79859dc0a42f3efce?s=128" alt="路由器"></figure><p class="title is-size-4 is-block" style="line-height:inherit;">路由器</p><p class="is-size-6 is-block">笔记</p><p class="is-size-6 is-flex justify-content-center"><i class="fas fa-map-marker-alt mr-1"></i><span>M78</span></p></div></div></nav><nav class="level is-mobile"><div class="level-item has-text-centered is-marginless"><div><p class="heading">文章</p><a href="/archives"><p class="title">31</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">分类</p><a href="/categories"><p class="title">11</p></a></div></div><div class="level-item has-text-centered is-marginless"><div><p class="heading">标签</p><a href="/tags"><p class="title">14</p></a></div></div></nav><div class="level"><a class="level-item button is-primary is-rounded" href="https://github.com/zcy626727" target="_blank" rel="noopener">关注我</a></div><div class="level is-mobile is-multiline"><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Github" href="https://github.com/zcy626727"><i class="fab fa-github"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Facebook" href="https://facebook.com"><i class="fab fa-facebook"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Twitter" href="https://twitter.com"><i class="fab fa-twitter"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="Dribbble" href="https://dribbble.com"><i class="fab fa-dribbble"></i></a><a class="level-item button is-transparent is-marginless" target="_blank" rel="noopener" title="RSS" href="/"><i class="fas fa-rss"></i></a></div></div></div><!--!--><div class="card widget" data-type="links"><div class="card-content"><div class="menu"><h3 class="menu-label">链接</h3><ul class="menu-list"><li><a class="level is-mobile" href="https://hexo.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Hexo</span></span><span class="level-right"><span class="level-item tag">hexo.io</span></span></a></li><li><a class="level is-mobile" href="https://bulma.io" target="_blank" rel="noopener"><span class="level-left"><span class="level-item">Bulma</span></span><span class="level-right"><span class="level-item tag">bulma.io</span></span></a></li></ul></div></div></div><div class="card widget" data-type="categories"><div class="card-content"><div class="menu"><h3 class="menu-label">分类</h3><ul class="menu-list"><li><a class="level is-mobile" href="/categories/Java/"><span class="level-start"><span class="level-item">Java</span></span><span class="level-end"><span class="level-item tag">23</span></span></a><ul><li><a class="level is-mobile" href="/categories/Java/Spring/"><span class="level-start"><span class="level-item">Spring</span></span><span class="level-end"><span class="level-item tag">9</span></span></a></li><li><a class="level is-mobile" href="/categories/Java/Spring-Boot/"><span class="level-start"><span class="level-item">Spring Boot</span></span><span class="level-end"><span class="level-item tag">12</span></span></a></li><li><a class="level is-mobile" href="/categories/Java/Spring-Boots/"><span class="level-start"><span class="level-item">Spring Boots</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/categories/Java/Spring-MVC/"><span class="level-start"><span class="level-item">Spring MVC</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/Kubernetes/"><span class="level-start"><span class="level-item">Kubernetes</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/categories/Linux/"><span class="level-start"><span class="level-item">Linux</span></span><span class="level-end"><span class="level-item tag">4</span></span></a><ul><li><a class="level is-mobile" href="/categories/Linux/Fedora/"><span class="level-start"><span class="level-item">Fedora</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/categories/Linux/Ubuntu/"><span class="level-start"><span class="level-item">Ubuntu</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li></ul></li><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"><span class="level-start"><span class="level-item">数据库</span></span><span class="level-end"><span class="level-item tag">1</span></span></a><ul><li><a class="level is-mobile" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/Redis/"><span class="level-start"><span class="level-item">Redis</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></li></ul></div></div></div><div class="column-right-shadow is-hidden-widescreen"></div></div><div class="column column-right is-4-tablet is-4-desktop is-3-widescreen is-hidden-touch is-hidden-desktop-only order-3"><div class="card widget" data-type="recent-posts"><div class="card-content"><h3 class="menu-label">最新文章</h3><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-06-25T14:54:00.000Z">2022-06-25</time></p><p class="title"><a href="/2022/06/25/linux/fedora/fedora%20%E5%AD%98%E5%82%A8%E5%BA%93/">Fedora 包管理器</a></p><p class="categories"><a href="/categories/Linux/">Linux</a> / <a href="/categories/Linux/Fedora/">Fedora</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-06-24T16:00:00.000Z">2022-06-25</time></p><p class="title"><a href="/2022/06/25/linux/fedora/feaora%E5%88%9D%E5%A7%8B%E5%8C%96%E9%85%8D%E7%BD%AE/">Fedora 初始化配置</a></p><p class="categories"><a href="/categories/Linux/">Linux</a> / <a href="/categories/Linux/Fedora/">Fedora</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-05-29T07:46:22.000Z">2022-05-29</time></p><p class="title"><a href="/2022/05/29/linux/ubuntu/Ubuntu%20%E5%88%9D%E5%A7%8B%E5%8C%96%E9%85%8D%E7%BD%AE/">Ubuntu 初始化配置</a></p><p class="categories"><a href="/categories/Linux/">Linux</a> / <a href="/categories/Linux/Ubuntu/">Ubuntu</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-05-29T07:46:22.000Z">2022-05-29</time></p><p class="title"><a href="/2022/05/29/linux/ubuntu/Ubuntu%20%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/">Ubuntu 包管理器</a></p><p class="categories"><a href="/categories/Linux/">Linux</a> / <a href="/categories/Linux/Ubuntu/">Ubuntu</a></p></div></article><article class="media"><div class="media-content"><p class="date"><time dateTime="2022-05-23T05:18:16.000Z">2022-05-23</time></p><p class="title"><a href="/2022/05/23/tools/Kubernetes/Kubernetes%E9%85%8D%E7%BD%AE%E5%8F%8A%E5%91%BD%E4%BB%A4/">Kubernetes 配置及命令</a></p><p class="categories"><a href="/categories/Kubernetes/">Kubernetes</a></p></div></article></div></div><div class="card widget" data-type="archives"><div class="card-content"><div class="menu"><h3 class="menu-label">归档</h3><ul class="menu-list"><li><a class="level is-mobile" href="/archives/2022/06/"><span class="level-start"><span class="level-item">六月 2022</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2022/05/"><span class="level-start"><span class="level-item">五月 2022</span></span><span class="level-end"><span class="level-item tag">5</span></span></a></li><li><a class="level is-mobile" href="/archives/2022/01/"><span class="level-start"><span class="level-item">一月 2022</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/12/"><span class="level-start"><span class="level-item">十二月 2021</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/06/"><span class="level-start"><span class="level-item">六月 2021</span></span><span class="level-end"><span class="level-item tag">4</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/05/"><span class="level-start"><span class="level-item">五月 2021</span></span><span class="level-end"><span class="level-item tag">3</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/04/"><span class="level-start"><span class="level-item">四月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/03/"><span class="level-start"><span class="level-item">三月 2021</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2021/01/"><span class="level-start"><span class="level-item">一月 2021</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/12/"><span class="level-start"><span class="level-item">十二月 2020</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/10/"><span class="level-start"><span class="level-item">十月 2020</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/09/"><span class="level-start"><span class="level-item">九月 2020</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/08/"><span class="level-start"><span class="level-item">八月 2020</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/07/"><span class="level-start"><span class="level-item">七月 2020</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/06/"><span class="level-start"><span class="level-item">六月 2020</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/05/"><span class="level-start"><span class="level-item">五月 2020</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/03/"><span class="level-start"><span class="level-item">三月 2020</span></span><span class="level-end"><span class="level-item tag">2</span></span></a></li><li><a class="level is-mobile" href="/archives/2020/02/"><span class="level-start"><span class="level-item">二月 2020</span></span><span class="level-end"><span class="level-item tag">1</span></span></a></li></ul></div></div></div><div class="card widget" data-type="tags"><div class="card-content"><div class="menu"><h3 class="menu-label">标签</h3><div class="field is-grouped is-grouped-multiline"><div class="control"><a class="tags has-addons" href="/tags/Fedora/"><span class="tag">Fedora</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Kubernetes/"><span class="tag">Kubernetes</span><span class="tag">3</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Redis/"><span class="tag">Redis</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SpringBootWeb%E6%A1%86%E6%9E%B6%E9%9B%86%E6%88%90/"><span class="tag">SpringBootWeb框架集成</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SpringBoot%E6%95%B0%E6%8D%AE%E5%BA%93%E9%9B%86%E6%88%90/"><span class="tag">SpringBoot数据库集成</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SpringBoot%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD/"><span class="tag">SpringBoot核心功能</span><span class="tag">5</span></a></div><div class="control"><a class="tags has-addons" href="/tags/SpringBoot%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/"><span class="tag">SpringBoot源码解析</span><span class="tag">5</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spring%E6%95%B0%E6%8D%AE%E8%AE%BF%E9%97%AE/"><span class="tag">Spring数据访问</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spring%E6%A0%B8%E5%BF%83%E5%8A%9F%E8%83%BD/"><span class="tag">Spring核心功能</span><span class="tag">6</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Spring%E6%B3%A8%E8%A7%A3/"><span class="tag">Spring注解</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/Ubuntu/"><span class="tag">Ubuntu</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/fedora/"><span class="tag">fedora</span><span class="tag">1</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E5%8C%85%E7%AE%A1%E7%90%86%E5%99%A8/"><span class="tag">包管理器</span><span class="tag">2</span></a></div><div class="control"><a class="tags has-addons" href="/tags/%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE/"><span class="tag">环境配置</span><span class="tag">2</span></a></div></div></div></div></div></div></div></div></section><footer class="footer"><div class="container"><div class="level"><div class="level-start"><a class="footer-logo is-block mb-2" href="/"><img src="/img/logo.svg" alt="路由器" height="28"></a><p class="is-size-7"><span>&copy; 2022 路由器</span>  Powered by <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a> &amp; <a href="https://github.com/ppoffice/hexo-theme-icarus" target="_blank" rel="noopener">Icarus</a></p></div><div class="level-end"><div class="field has-addons"><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Creative Commons" href="https://creativecommons.org/"><i class="fab fa-creative-commons"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Attribution 4.0 International" href="https://creativecommons.org/licenses/by/4.0/"><i class="fab fa-creative-commons-by"></i></a></p><p class="control"><a class="button is-transparent is-large" target="_blank" rel="noopener" title="Download on GitHub" href="https://github.com/ppoffice/hexo-theme-icarus"><i class="fab fa-github"></i></a></p></div></div></div></div></footer><script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/moment@2.22.2/min/moment-with-locales.min.js"></script><script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.4/dist/clipboard.min.js" defer></script><script>moment.locale("zh-CN");</script><script>var IcarusThemeSettings = {
+            article: {
+                highlight: {
+                    clipboard: true,
+                    fold: 'unfolded'
+                }
+            }
+        };</script><script src="/js/column.js"></script><script src="/js/animation.js"></script><a id="back-to-top" title="回到顶端" href="javascript:;"><i class="fas fa-chevron-up"></i></a><script src="/js/back_to_top.js" defer></script><!--!--><!--!--><!--!--><script src="https://cdn.jsdelivr.net/npm/cookieconsent@3.1.1/build/cookieconsent.min.js" defer></script><script>window.addEventListener("load", () => {
+      window.cookieconsent.initialise({
+        type: "info",
+        theme: "edgeless",
+        static: false,
+        position: "bottom-left",
+        content: {
+          message: "此网站使用Cookie来改善您的体验。",
+          dismiss: "知道了！",
+          allow: "允许使用Cookie",
+          deny: "拒绝",
+          link: "了解更多",
+          policy: "Cookie政策",
+          href: "https://www.cookiesandyou.com/",
+        },
+        palette: {
+          popup: {
+            background: "#edeff5",
+            text: "#838391"
+          },
+          button: {
+            background: "#4b81e8"
+          },
+        },
+      });
+    });</script><script src="https://cdn.jsdelivr.net/npm/lightgallery@1.10.0/dist/js/lightgallery.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/justifiedGallery@3.8.1/dist/js/jquery.justifiedGallery.min.js" defer></script><script>window.addEventListener("load", () => {
+            if (typeof $.fn.lightGallery === 'function') {
+                $('.article').lightGallery({ selector: '.gallery-item' });
+            }
+            if (typeof $.fn.justifiedGallery === 'function') {
+                if ($('.justified-gallery > p > .gallery-item').length) {
+                    $('.justified-gallery > p > .gallery-item').unwrap();
+                }
+                $('.justified-gallery').justifiedGallery();
+            }
+        });</script><!--!--><!--!--><!--!--><!--!--><!--!--><script src="/js/main.js" defer></script><div class="searchbox"><div class="searchbox-container"><div class="searchbox-header"><div class="searchbox-input-container"><input class="searchbox-input" type="text" placeholder="想要查找什么..."></div><a class="searchbox-close" href="javascript:;">×</a></div><div class="searchbox-body"></div></div></div><script src="/js/insight.js" defer></script><script>document.addEventListener('DOMContentLoaded', function () {
+            loadInsight({"contentUrl":"/content.json"}, {"hint":"想要查找什么...","untitled":"(无标题)","posts":"文章","pages":"页面","categories":"分类","tags":"标签"});
+        });</script></body></html>
